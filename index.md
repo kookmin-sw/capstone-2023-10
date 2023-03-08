@@ -2,7 +2,8 @@
 
 저희의 github은 [github](https://github.com/kookmin-sw/capstone-2023-10)으로 들어갈 수 있습니다.
 
- ## 10팀 소개
+## 10팀 소개
+
 > ### 프로젝트 소개
 > spot instance...
 
