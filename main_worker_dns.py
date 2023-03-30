@@ -80,25 +80,30 @@ def describe_spot_instance_requests(spot_instance_request_ids):
     return status
 
 
+def create_load_balancer(name, subnets, scheme='internet-facing', lb_type='network'):
+    return elb_client.create_load_balancer(
+        Name=name,
+        Subnets=subnets,
+        Scheme=scheme,
+        Type=lb_type
+    )
+
 
 ### test codes
+
+## 온디맨드 인스턴스 생성 및 종료
 # create_instances('t2.medium', 'ami-0ee93c90bc65c86c2', 'kh-oregon')
 # terminate_instances(['i-06569c50a3236d0a9'])
-#
-new_instances = request_spot_instances('ami-016b1f9568b08fffb', 'a1.medium', 'kh-oregon', 1, f'{region_name}c')
 
-spot_instance_request_ids = get_spot_instance_request_ids(new_instances)
-print(f'request spot instance ids : {spot_instance_request_ids}')
-print(new_instances)
+## 스팟 인스턴스 생성 후 상태 확인 및 종료
+# new_instances = request_spot_instances('ami-016b1f9568b08fffb', 'a1.medium', 'kh-oregon', 1, f'{region_name}c')
+# spot_instance_request_ids = get_spot_instance_request_ids(new_instances)
+# print(f'request spot instance ids : {spot_instance_request_ids}')
+# print(new_instances)
+# time.sleep(5)
+# status = describe_spot_instance_requests(spot_instance_request_ids)
+# print(status)
+# time.sleep(15)
+# cancel_spot_instance_requests(spot_instance_request_ids)
+# print(f'canceled spot instance ids : {spot_instance_request_ids}')
 
-### 임시코드
-time.sleep(5)
-status = describe_spot_instance_requests(spot_instance_request_ids)
-print(status)
-
-time.sleep(15)
-###
-
-
-cancel_spot_instance_requests(spot_instance_request_ids)
-print(f'canceled spot instance ids : {spot_instance_request_ids}')
