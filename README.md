@@ -15,7 +15,8 @@
 <br/>
 
 ## 구조도
-<img width="861" alt="구조도" src="https://user-images.githubusercontent.com/105338304/228797675-5bdaedcf-6514-4903-9662-85040c4aa112.png">
+![228824540-f6a6011e-88cf-4781-a46b-ba77c3acbd42](https://user-images.githubusercontent.com/105338304/228825155-d98d6455-6469-431c-8948-f14a7c9a2050.png)
+
 
 <br/>
 
