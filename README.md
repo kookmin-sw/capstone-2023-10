@@ -1,77 +1,66 @@
-[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-c66648af7eb3fe8bc4f294546bfd86ef473780cde1dea487d3c4ff354943c9ae.svg)](https://classroom.github.com/online_ide?assignment_repo_id=10030059&assignment_repo_type=AssignmentRepo)
-# Welcome to GitHub
+# OptiNotebook
+ **팀 페이지**  :  [https://kookmin-sw.github.io/capstone-2023-10/](https://kookmin-sw.github.io/capstone-2023-10/)
 
-캡스톤 팀 생성을 축하합니다.
-
-## 팀소개 및 페이지를 꾸며주세요.
-
-- 프로젝트 소개
-  - 프로젝트 설치방법 및 데모, 사용방법, 프리뷰등을 readme.md에 작성.
-  - Api나 사용방법등 내용이 많을경우 wiki에 꾸미고 링크 추가.
-
-- 팀페이지 꾸미기
-  - 프로젝트 소개 및 팀원 소개
-  - index.md 예시보고 수정.
-
-- GitHub Pages 리파지토리 Settings > Options > GitHub Pages 
-  - Source를 marster branch
-  - Theme Chooser에서 태마선택
-  - 수정후 팀페이지 확인하여 점검.
-
-**팀페이지 주소** -> https://kookmin-sw.github.io/ '{{자신의 리파지토리 아이디}}'
-
-**예시)** 2023년 0조  https://kookmin-sw.github.io/capstone-2023-00/
+<br/>
 
 
-## 내용에 아래와 같은 내용들을 추가하세요.
 
-### 1. 프로잭트 소개
+## **1. 프로젝트 소개**
 
-프로젝트
+ **스팟 인스턴스**는 온디맨드 인스턴스를 위한 컴퓨팅 자원 중 잉여 컴퓨팅 자원을 기존 인스턴스에 비해 저렴한 가격으로 사용자에게 제공하는 인스턴스입니다. 그러나, 온디멘드 사용자의 증가나 스팟 인스턴스 사용자의 증가로 잉여 컴퓨팅 자원이 부족해지면 잦은 interrupt 발생의 위험이 있습니다. 
+저희의 프로젝트는 AWS, AZURE의 가격 정책과 제공되는 안전성 지표를 통해 인공지능 모델로 **최적의 스팟 인스턴스** 선택 시스템을 구축하여 사용자에게 최적의 서비스를 제공하도록 하는 것 입니다.
 
-### 2. 소개 영상
+**OptiNotebook**은 "최적화된 노트북"을 의미하며, 비용, 안정성, 성능 모두에서 최적의 선택을 제공하고, 새로운 인스턴스가 선택되면 자동으로 마이그레이션을 수행하는 기능을 갖추고 있습니다. 사용자가 이 프로젝트를 이용하면 최적화된 환경에서 주피터 노트북을 실행할 수 있습니다.
 
-프로젝트 소개하는 영상을 추가하세요
+<br/>
 
-### 3. 팀 소개
+## 구조도
+<img width="861" alt="구조도" src="https://user-images.githubusercontent.com/105338304/228797675-5bdaedcf-6514-4903-9662-85040c4aa112.png">
 
-팀을 소개하세요.
+<br/>
 
-팀원정보 및 담당이나 사진 및 SNS를 이용하여 소개하세요.
+## **2. 소개 영상**
+추후 추가 예정
 
-### 4. 사용법
+<br/>
 
-소스코드제출시 설치법이나 사용법을 작성하세요.
+## **3. 팀 소개**
 
-### 5. 기타
+## 황재일
+- Student ID : 20203169
+- role : 팀장, 주피터 노트북과 Main Worker 인스턴스 마이그레이션 시스템 구축
+- E-mail : jaeil@kookmin.ac.kr
 
-추가적인 내용은 자유롭게 작성하세요.
+
+## 강석현
+- Student ID : 20163080
+- role : Main Worker DNS 서비스 구성
+- E-mail : kh3654po@gmail.com
+
+## 김지수
+- Student ID : 20191429
+- role : 스팟 인스턴스 선택 모델 개발
+- E-mail : wltn2860@kookmin.ac.kr
+
+<br/>
+
+## 협력기업
+### **AWS**
+
+<br/>
+
+## **4. 사용법**
+
+추후 추가 예정
+
+<br/>
+
+## **5. 기타**
+추후 추가 예정
 
 
-## Markdown을 사용하여 내용꾸미기
 
-Markdown은 작문을 스타일링하기위한 가볍고 사용하기 쉬운 구문입니다. 여기에는 다음을위한 규칙이 포함됩니다.
 
-```markdown
-Syntax highlighted code block
 
-# Header 1
-## Header 2
-### Header 3
 
-- Bulleted
-- List
 
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-자세한 내용은 [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Support or Contact
-
-readme 파일 생성에 추가적인 도움이 필요하면 [도움말](https://help.github.com/articles/about-readmes/) 이나 [contact support](https://github.com/contact) 을 이용하세요.
