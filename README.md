@@ -36,7 +36,7 @@
 <br/>
 
 ## 구조도
-![228824540-f6a6011e-88cf-4781-a46b-ba77c3acbd42]([https://user-images.githubusercontent.com/105338304/228825155-d98d6455-6469-431c-8948-f14a7c9a2050.png](https://user-images.githubusercontent.com/66048830/229359450-81b377bb-cf71-41ef-b7d1-8c678b3713bf.png))
+![228824540-f6a6011e-88cf-4781-a46b-ba77c3acbd42](https://user-images.githubusercontent.com/66048830/229359450-81b377bb-cf71-41ef-b7d1-8c678b3713bf.png)
 
 
 <br/>
