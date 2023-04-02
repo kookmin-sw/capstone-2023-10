@@ -75,10 +75,6 @@
 - role : 스팟 인스턴스 선택 모델 개발
 - E-mail : wltn2860@kookmin.ac.kr
 
-<br/>
-
-## 협력기업
-### **AWS**
 
 <br/>
 
