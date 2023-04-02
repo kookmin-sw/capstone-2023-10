@@ -4,6 +4,27 @@
 <br/>
 
 
+## _**산학 협력 기업**_
+
+<img src="https://a0.awsstatic.com/libra-css/images/logos/aws_logo_smile_1200x630.png" width="400" height="200"/>
+
+## **AWS**
+**AWS**(Amazon Web Services)는 아마존닷컴의 클라우드 컴퓨팅 사업부이다.
+
+아마존 웹 서비스는 다른 웹 사이트나 클라이언트측 응용 프로그램에 대해 온라인 서비스를 제공하고 있다. 이러한 서비스의 상당수는 최종 사용자에 직접 공개되는 것이 아니고, 다른 개발자가 사용 가능한 기능을 제공하는 플랫폼을 제공하는 PaaS이다.
+
+아마존 웹 서비스의 각종 서비스는 REST 프로토콜 및 SOAP 프로토콜을 통해 접근, 이용 및 관리가 가능하다. 비용은 실제 사용량에 따라 결정되며, 일부 서비스의 경우 미리 고정된 금액을 지불하는 형태도 있다.
+
+<br/>
+
+### _**기업멘토**_
+## 김병준 이사님
+- E-mail : bjsearch@amazon.com
+
+<br/>
+<br/>
+
+
 
 ## **1. 프로젝트 소개**
 
@@ -15,7 +36,7 @@
 <br/>
 
 ## 구조도
-![228824540-f6a6011e-88cf-4781-a46b-ba77c3acbd42](https://user-images.githubusercontent.com/105338304/228825155-d98d6455-6469-431c-8948-f14a7c9a2050.png)
+![228824540-f6a6011e-88cf-4781-a46b-ba77c3acbd42]([https://user-images.githubusercontent.com/105338304/228825155-d98d6455-6469-431c-8948-f14a7c9a2050.png](https://user-images.githubusercontent.com/66048830/229359450-81b377bb-cf71-41ef-b7d1-8c678b3713bf.png))
 
 
 <br/>
@@ -26,6 +47,17 @@
 <br/>
 
 ## **3. 팀 소개**
+
+## 이창우 교수님
+- role : 지도교수, 멘토
+- E-mail : leecw05@kookmin.ac.kr
+
+## 이경용 교수님
+- role : 멘토
+- E-mail : leeky@kookmin.ac.kr
+
+<br/>
+<br/>
 
 ## 황재일
 - Student ID : 20203169
