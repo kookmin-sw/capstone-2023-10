@@ -52,9 +52,6 @@
 - role : 지도교수, 멘토
 - E-mail : leecw05@kookmin.ac.kr
 
-## 이경용 교수님
-- role : 멘토
-- E-mail : leeky@kookmin.ac.kr
 
 <br/>
 <br/>
