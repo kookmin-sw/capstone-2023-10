@@ -91,12 +91,6 @@ github : [capstone-2023-10](https://github.com/kookmin-sw/capstone-2023-10)
 > * E-mail : leecw05@kookmin.ac.kr
 > 
 > ---
->
-> ### 이경용 교수님
-> * role : 멘토
-> * E-mail : leeky@kookmin.ac.kr
-> 
-> ---
 > 
 > ### 황재일  
 > * Student ID : 20203169  
