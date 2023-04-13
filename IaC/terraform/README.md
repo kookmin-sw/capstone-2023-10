@@ -44,8 +44,12 @@
    * 위의 예시로는 default.
    * 만약 위의 []안이 default가 아니라면 해당값을 넣는다.
 
-
-## 설정 변경을 원할 시
-1. variables.tf의 값을 변경하면 해당값이 적용된다.
-
-2. 각 tf 파일의 내용을 변경한다.
+3. variables.tf의 값들을 변경한다.
+   * 해당 파일에서 region prefix instance_type key_name ami를 설정할 수 있다.
+     * region : 리소스들이 생성될 리전을 입력한다. profile의 리전과 같도록 설정.
+     * prefix : 생성될 리소스들의 이름 앞에 붙을 문자. 예를 들어 prefix가 "example"이면 생성된 VPC 이름은 "example-vpc"가 된다.
+     * instance_type : 생성될 인스턴스의 타입 (t3.small)
+     * key_name : 생성된 인스턴스에 사용할 키페어 이름
+     * ami : 생성될 인스턴스의 ami
+  
+4. 각 tf 파일을 열어보면 각각의 리소스에서 설정 값들을 변경할 수 있다.
