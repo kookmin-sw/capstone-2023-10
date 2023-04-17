@@ -46,19 +46,18 @@ def new_instance(instanceInfo, subnetInfo):
             ec2_client = session.client('ec2')
             waiter = ec2_client.get_waiter('spot_instance_request_fulfilled')
             imageId = arch_to_ami(instanceType, ec2_client)
-            print(imageId)
 
-            # SubnetId = subnetInfo['SubnetId']
-            # requestResponse['Response'] = ec2_client.request_spot_instances(
-            #     InstanceCount=1,
-            #     LaunchSpecification={
-            #         'ImageId': imageId,
-            #         'InstanceType':instanceType,
-            #         'Placement': {'AvailabilityZone':az},
-            #         'SubnetId':subnetId,
-            #         'Userdata':''
-            #     }
-            # )
+            SubnetId = subnetInfo['SubnetId']
+            requestResponse['Response'] = ec2_client.request_spot_instances(
+                InstanceCount=1,
+                LaunchSpecification={
+                    'ImageId': imageId,
+                    'InstanceType':instanceType,
+                    'Placement': {'AvailabilityZone':az},
+                    'SubnetId':subnetId,
+                    'Userdata':''
+                }
+            )
             pass
         elif vendor == 'AZURE':
             # Request AZURE Spot VM in AZURE Subnet
@@ -75,12 +74,20 @@ def new_instance(instanceInfo, subnetInfo):
 
 
 # Migrate to New Instance from Source Instance
-def migration(newInstanceInfo, sourceInstanceInfo):
+def migration(newInstanceInfo, sourceInstanceInfo, subnetInfo):
     # Checkpointing from Source Instance
     # Send Checkpointing Execution Line to Source Instance
     sourceVendor = sourceInstanceInfo['Vendor']
     try:
         if sourceVendor == 'AWS':
+            session = boto3.session.Session(profile_name=AWS_PROFILE_NAME, region_name=AWS_REGION_NAME)
+            ssm_client = session.client('ssm')
+            instanceId = sourceInstanceInfo['InstanceId']
+            response = ssm_client.send_command(
+                InstanceIds=[instanceId,],
+                DocumentName="AWS-RunShellScript",
+                Parameters={'commands':['mkdir test', 'mkdir test2']}
+            )
             pass
         elif sourceVendor == 'AZURE':
             pass
@@ -90,6 +97,9 @@ def migration(newInstanceInfo, sourceInstanceInfo):
             print("Info is Incorrect")
     except Exception as e:
         print(e)
+
+    # Request New Spot Instance
+    response = new_instance(newInstanceInfo, subnetInfo)
 
     # Restoring to New Instance
     # Send Restoring Execution Line to New Instance
