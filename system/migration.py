@@ -34,7 +34,7 @@ def arch_to_ami(instanceType, ec2_client):
 def new_instance(instanceInfo, subnetInfo):
     vendor = instanceInfo['Vendor']
 
-    requestResponse = {"Vendor" : vendor, "Response" : None}
+    requestResponse = {}
     try:
         if vendor == 'AWS':
             # Request AWS Spot Instance in AWS Subnet
@@ -48,7 +48,7 @@ def new_instance(instanceInfo, subnetInfo):
             imageId = arch_to_ami(instanceType, ec2_client)
 
             SubnetId = subnetInfo['SubnetId']
-            requestResponse['Response'] = ec2_client.request_spot_instances(
+            requestResponse = ec2_client.request_spot_instances(
                 InstanceCount=1,
                 LaunchSpecification={
                     'ImageId': imageId,
@@ -106,6 +106,14 @@ def migration(newInstanceInfo, sourceInstanceInfo, subnetInfo):
     newVendor = newInstanceInfo['Vendor']
     try:
         if newVendor == 'AWS':
+            session = boto3.session.Session(profile_name=AWS_PROFILE_NAME, region_name=AWS_REGION_NAME)
+            ssm_client = session.client('ssm')
+            instanceId = response['InstanceId']
+            response = ssm_client.send_command(
+                InstanceIds=[instanceId,],
+                DocumentName="AWS-RunShellScript",
+                Parameters={'commands':['mkdir test', 'mkdir test2']}
+            )
             pass
         elif newVendor == 'AZURE':
             pass
