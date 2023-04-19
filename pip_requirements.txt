@@ -7,3 +7,4 @@ azure-mgmt-network==23.0.0
 boto3==1.24.35
 botocore==1.27.38
 pandas==1.4.3
+pickle5==0.0.12
