@@ -1,17 +1,21 @@
 #!/bin/bash
 
+echo "Configure Your AWS Account"
+read -p "[Access Key Id]: " ACCESS_KEY
+read -p "[Secret Access Key]: " SECRET_KEY
+
 # Detect the operating system
 OS=$(uname -s)
 
 if [ "$OS" = "Darwin" ]; then
   # MacOS
   if [[ $(command -v brew) == "" ]]; then
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
-  brew update
-  brew install python@3.9
-  pip install -r pip_requirements.txt
-  brew install hashicorp/tap/terraform@1.4.5
+  sudo brew update
+  sudo brew install python@3.9
+  sudo pip install -r pip_requirements.txt
+  sudo brew install hashicorp/tap/terraform@1.4.5
 
 elif [ "$OS" = "Linux" ]; then
   # Ubuntu or RedHat
@@ -19,19 +23,19 @@ elif [ "$OS" = "Linux" ]; then
     # Ubuntu
     sudo apt-get update
     sudo apt-get install python3.9
-    pip install -r pip_requirements.txt
+    sudo pip install -r pip_requirements.txt
     sudo apt-get install -y wget unzip
-    wget https://releases.hashicorp.com/terraform/1.4.5/terraform_1.4.5_linux_amd64.zip
-    unzip terraform_1.4.5_linux_amd64.zip
+    sudo wget https://releases.hashicorp.com/terraform/1.4.5/terraform_1.4.5_linux_amd64.zip
+    sudo unzip terraform_1.4.5_linux_amd64.zip
     sudo mv terraform /usr/local/bin/
   elif [ -f "/etc/redhat-release" ]; then
     # RedHat
     sudo yum update
     sudo yum install python39
-    pip install -r pip_requirements.txt
+    sudo pip install -r pip_requirements.txt
     sudo yum install -y wget unzip
-    wget https://releases.hashicorp.com/terraform/1.4.5/terraform_1.4.5_linux_amd64.zip
-    unzip terraform_1.4.5_linux_amd64.zip
+    sudo wget https://releases.hashicorp.com/terraform/1.4.5/terraform_1.4.5_linux_amd64.zip
+    sudo unzip terraform_1.4.5_linux_amd64.zip
     sudo mv terraform /usr/local/bin/
   fi
 
