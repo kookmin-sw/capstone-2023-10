@@ -5,8 +5,12 @@ OS=$(uname -s)
 
 if [ "$OS" = "Darwin" ]; then
   # MacOS
+  if [[ $(command -v brew) == "" ]]; then
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  fi
   brew update
   brew install python@3.9
+  pip install -r pip_requirements.txt
   brew install hashicorp/tap/terraform@1.4.5
 
 elif [ "$OS" = "Linux" ]; then
@@ -15,6 +19,7 @@ elif [ "$OS" = "Linux" ]; then
     # Ubuntu
     sudo apt-get update
     sudo apt-get install python3.9
+    pip install -r pip_requirements.txt
     sudo apt-get install -y wget unzip
     wget https://releases.hashicorp.com/terraform/1.4.5/terraform_1.4.5_linux_amd64.zip
     unzip terraform_1.4.5_linux_amd64.zip
@@ -23,6 +28,7 @@ elif [ "$OS" = "Linux" ]; then
     # RedHat
     sudo yum update
     sudo yum install python39
+    pip install -r pip_requirements.txt
     sudo yum install -y wget unzip
     wget https://releases.hashicorp.com/terraform/1.4.5/terraform_1.4.5_linux_amd64.zip
     unzip terraform_1.4.5_linux_amd64.zip
@@ -40,6 +46,8 @@ elif [ "$OS" = "Windows_NT" ]; then
   & $TEMP_DIR /quiet InstallAllUsers=1 PrependPath=1
 
   Remove-Item $TEMP_DIR
+  
+  pip install -r pip_requirements.txt
 
   $TERRAFORM_URL = "https://releases.hashicorp.com/terraform/1.4.5/terraform_1.4.5_windows_amd64.zip"
   $ZIP_FILE = "terraform_1.4.5_windows_amd64.zip"
