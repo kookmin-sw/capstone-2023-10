@@ -25,6 +25,7 @@ EFS_ID = None
 ### NETWORK
 SUBNET_ID = None
 SECURITYGROUP_ID = None
+LOAD_BALANCER_NAME = None
 TARGET_GROUP_ARN = None
 ## << GCP >>
 ### ...
@@ -177,6 +178,7 @@ def load_variable():
     EFS_ID = ssm_client.get_parameter(Name="EFS_ID", WithDecryption=True)['Parameter']['Value']
     SUBNET_ID = ssm_client.get_parameter(Name="SUBNET_ID", WithDecryption=True)['Parameter']['Value']
     SECURITYGROUP_ID = ssm_client.get_parameter(Name="SECURITYGROUP_ID", WithDecryption=True)['Parameter']['Value']
+    LOAD_BALANCER_NAME = ssm_client.get_parameter(Name="LOAD_BALANCER_NAME", WithDecryption=True)['Parameter']['Value']
     TARGET_GROUP_ARN = ssm_client.get_parameter(Name="TARGET_GROUP_ARN", WithDecryption=True)['Parameter']['Value']
 
 
@@ -324,3 +326,12 @@ def lambda_handler(event, context):
 
 if __name__ == __main__:
     init()
+    client = boto3.client('elbv2')
+    response = client.describe_load_balancers(
+        Names=['my-load-balancer']
+    )
+
+    dns_name = response['LoadBalancers'][0]['DNSName']
+    print("=================Connect to Jupyter Notebook=================")
+    print(dns_name+"/tree")
+    print("=============================================================")
