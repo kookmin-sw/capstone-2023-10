@@ -58,13 +58,13 @@
 
 ## 황재일
 - Student ID : 20203169
-- role : 팀장, 주피터 노트북과 Main Worker 인스턴스 마이그레이션 시스템 구축
+- role : 팀장, 주피터 노트북 기능 커스텀, 서버리스 스팟 인스턴스 마이그레이션 시스템 구축
 - E-mail : jaeil@kookmin.ac.kr
 
 
 ## 강석현
 - Student ID : 20163080
-- role : Main Worker DNS 서비스 구성
+- role : 클라우드 환경 구축, DNS 서비스 구성
 - E-mail : kh3654po@gmail.com
 
 ## 김지수
@@ -77,7 +77,9 @@
 
 ## **4. 사용법**
 
-추후 추가 예정
+1. git clone https://github.com/kookmin-sw/capstone-2023-10.git
+2. cd capstone-2023-10
+3. bash run.sh
 
 <br/>
 
