@@ -60,6 +60,13 @@ sudo podman container restore --file-locks --tcp-established --keep --print-stat
 # ==================================================================================
 
 
+def select_instance(instanceInfo={"Vendor":"Empty"}):
+    if instanceInfo['vendor'] == "Empty":
+        pass
+    else:
+        pass
+
+
 def check_userdata_complete(instanceId):
     pass
 
@@ -315,3 +322,5 @@ def lambda_handler(event, context):
         "statusCode": 200
     } 
 
+if __name__ == __main__:
+    init()
