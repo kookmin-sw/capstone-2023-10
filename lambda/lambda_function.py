@@ -19,6 +19,7 @@ IAM_ROLE_ARN = None
 AMI_OS = "RHEL-9.0*_HVM-*"
 AMI_ARM = None
 AMI_INTEL = None
+NOW_VENDOR = None
 ### EFS
 EFS_PATH = "/checkpoint"
 EFS_ID = None
@@ -257,6 +258,13 @@ def create_instance(instanceInfo, state):
             pass
         else:
             print("[ERROR]Info is Incorrect")
+        ssm_client.put_parameter(
+            Name="NOW_VENDOR",
+            Value=vendor,
+            Type='SecureString',
+            Description="Cloud Vendor Working on Now",
+            Overwrite=True
+        )
     except Exception as e:
         print("[ERROR]"+e)
     
@@ -302,23 +310,27 @@ def migration(newInstanceInfo, sourceInstanceInfo):
 
     return response
 
-def init(newInstanceInfo, subnetInfo):
+def init(newInstanceInfo):
     response = create_instance(newInstanceInfo, "NEW")
 
     return response
 
 def lambda_handler(event, context):
     load_variable()
-    elbv2_client = boto3.client('elbv2', region_name=AWS_REGION_NAME)
-    response = elbv2_client.describe_target_health(
-        TargetGroupArn=TARGET_GROUP_ARN
-    )
 
-    num_targets = len(response['TargetHealthDescriptions'])
-    if num_targets == 0:
-        init()
-    else:
-        migration(event['NewInstanceInfo'], {'Vendor': 'AWS', 'InstanceId': response['TargetHealthDescriptions'][0]['Target']['Id']})
+    try:
+        ssm_client = boto3.client('ssm', region_name=AWS_REGION_NAME)
+        elbv2_client = boto3.client('elbv2', region_name=AWS_REGION_NAME)
+        response = elbv2_client.describe_target_health(
+            TargetGroupArn=TARGET_GROUP_ARN
+        )
+        NOW_VENDOR = ssm_client.get_parameter(Name="NOW_VENDOR", WithDecryption=True)['Parameter']['Value']
+        sourceInstanceInfo = {'Vendor': NOW_VENDOR, 'InstanceId': response['TargetHealthDescriptions'][0]['Target']['Id']}
+        newInstanceInfo = select_instance(sourceInstanceInfo)
+        migration(newInstanceInfo, sourceInstanceInfo)
+    except:
+        newInstanceInfo = select_instance()
+        init(newInstanceInfo)
     
     return {
         "statusCode": 200
