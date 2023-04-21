@@ -22,3 +22,13 @@ variable "ami" {
   type = string
   default = "ami-04cebc8d6c4f297a3" 
 }
+
+variable "lambda_handler_file" {
+  type = string
+  default = "hello_world"
+}
+
+variable "lambda_zip_file" {
+  type = string
+  default = "hello_world.zip"
+}
