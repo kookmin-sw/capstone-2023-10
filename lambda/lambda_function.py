@@ -20,6 +20,7 @@ AMI_OS = "RHEL-9.0*_HVM-*"
 AMI_ARM = None
 AMI_INTEL = None
 NOW_VENDOR = None
+NOW_INSTANCE_ID = None
 ### EFS
 EFS_PATH = "/checkpoint"
 EFS_ID = None
@@ -249,6 +250,21 @@ def create_instance(instanceInfo, state):
                     },
                 ]
             )
+            
+            ssm_client.put_parameter(
+                Name="NOW_VENDOR",
+                Value=vendor,
+                Type='SecureString',
+                Description="Cloud Vendor Working on Now",
+                Overwrite=True
+            )
+            ssm_client.put_parameter(
+                Name="NOW_INSTANCE_ID",
+                Value=requestResponse['InstanceId'],
+                Type='SecureString',
+                Description="Cloud Vendor Working on Now",
+                Overwrite=True
+            )
 
         elif vendor == 'AZURE':
             # Request AZURE Spot VM in AZURE Subnet
@@ -258,13 +274,6 @@ def create_instance(instanceInfo, state):
             pass
         else:
             print("[ERROR]Info is Incorrect")
-        ssm_client.put_parameter(
-            Name="NOW_VENDOR",
-            Value=vendor,
-            Type='SecureString',
-            Description="Cloud Vendor Working on Now",
-            Overwrite=True
-        )
     except Exception as e:
         print("[ERROR]"+e)
     
@@ -325,7 +334,8 @@ def lambda_handler(event, context):
             TargetGroupArn=TARGET_GROUP_ARN
         )
         NOW_VENDOR = ssm_client.get_parameter(Name="NOW_VENDOR", WithDecryption=True)['Parameter']['Value']
-        sourceInstanceInfo = {'Vendor': NOW_VENDOR, 'InstanceId': response['TargetHealthDescriptions'][0]['Target']['Id']}
+        NOW_INSTANCE_ID = ssm_client.get_parameter(Name="NOW_INSTANCE_ID", WithDecryption=True)['Parameter']['Value']
+        sourceInstanceInfo = {'Vendor': NOW_VENDOR, 'InstanceId': NOW_INSTANCE_ID}
         newInstanceInfo = select_instance(sourceInstanceInfo)
         migration(newInstanceInfo, sourceInstanceInfo)
     except:

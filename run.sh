@@ -72,7 +72,7 @@ else
   exit 1
 fi
 
-terraform init
-terraform apply
+terraform -chdir=./IaC/terraform/ init
+terraform -chdir=./IaC/terraform/ apply
 
 python3 ./lambda/lambda_function.py
