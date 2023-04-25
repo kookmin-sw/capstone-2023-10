@@ -53,3 +53,10 @@
      * ami : 생성될 인스턴스의 ami
   
 4. 각 tf 파일을 열어보면 각각의 리소스에서 설정 값들을 변경할 수 있다.
+
+---
+
+## How to Use Terraform
+
+1. First, install Terraform.
+
