@@ -1,7 +1,7 @@
 resource "aws_lambda_function" "main-worker" {
   function_name = "${var.prefix}-main-worker"
-  filename = var.lambda_zip_file
-  handler = "${var.lambda_handler_file}.lambda_handler"
+  filename = "lambda_function.zip"
+  handler = "lambda_function.lambda_handler"
   runtime = "python3.9"
   memory_size = 1 * 1024
   timeout = 120
