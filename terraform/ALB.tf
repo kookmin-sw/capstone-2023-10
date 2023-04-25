@@ -41,11 +41,11 @@ resource "aws_lb_target_group" "main-worker-tg" {
   vpc_id   = aws_vpc.vpc.id
 }
 
-resource "aws_lb_target_group_attachment" "main-worker-tg-attachment" {
-  target_group_arn = aws_lb_target_group.main-worker-tg.arn
-  target_id = aws_instance.main-worker.id
-  port = 80
-}
+# resource "aws_lb_target_group_attachment" "main-worker-tg-attachment" {
+#   target_group_arn = aws_lb_target_group.main-worker-tg.arn
+#   target_id = aws_lambda_function.main-worker.id
+#   port = 80
+# }
 
 resource "aws_lb_target_group" "jupyter-tg" {
   name     = "jupyter-tg"
