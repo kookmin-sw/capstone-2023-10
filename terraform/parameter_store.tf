@@ -1,7 +1,7 @@
 resource "aws_ssm_parameter" "iam_role_parameter" {
     name = "IAM_ROLE_ARN"
     type = "String"
-    value = aws_iam_role.spot-instance-role.arn
+    value = aws_iam_instance_profile.spot-instance-role-profile.arn
 }
 
 resource "aws_ssm_parameter" "efs_parameter" {

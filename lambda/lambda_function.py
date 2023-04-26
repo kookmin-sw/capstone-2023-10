@@ -5,6 +5,7 @@ import google.cloud
 # etc
 import base64
 import pickle5
+import time
 
 # ==================================================================================
 # ============================== Set Default Variance ==============================
@@ -12,7 +13,7 @@ import pickle5
 ## << AWS >>
 ### Your Account Profile in Your AWS-CLI
 AWS_PROFILE_NAME = "spotrank"
-AWS_REGION_NAME = "us-west-2"
+AWS_REGION_NAME = "ap-northeast-2"
 ### IAM
 IAM_ROLE_ARN = None
 ### AMI
@@ -42,23 +43,19 @@ sudo yum install podman-4.2.0 -y
 sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
 sudo systemctl enable amazon-ssm-agent
 sudo systemctl start amazon-ssm-agent
-# Mount EFS
 sudo yum install amazon-efs-utils
-sudo mkdir {EFS_PTH}
+sudo mkdir {EFS_PATH}
 sudo mount -t efs -o tls {EFS_ID}:/ {EFS_PATH}
 sudo podman pull docker.io/jupyter/base-notebook
 sudo podman run --name jupyternb -e GRANT_SUDO=yes --user root -p 8800:8888 -d jupyter/base-notebook start-notebook.sh --NotebookApp.password='' --NotebookApp.token=''
-# 
-""",
+sudo podman container checkpoint jupyternb --file-locks --tcp-established --keep --print-stats -e {EFS_PATH}/jupyCheckpoint.tar.gz""",
     "MIGRATE" : f"""#!/bin/bash
 sudo systemctl enable amazon-ssm-agent
 sudo systemctl start amazon-ssm-agent
-# Mount EFS
 sudo mkdir {EFS_PATH}
 sudo mount -t efs -o tls {EFS_ID}:/ {EFS_PATH}
-sudo podman container restore --file-locks --tcp-established --keep --print-stats --import /checkpoint/jupyCheckpoint.tar.gz
-# 
-"""
+sudo podman container restore --file-locks --tcp-established --keep --print-stats --import {EFS_PATH}/jupyCheckpoint.tar.gz
+sudo podman start jupyternb"""
 }
 # ==================================================================================
 
@@ -70,14 +67,27 @@ def select_instance(instanceInfo={"Vendor":"Empty"}):
         pass
 
 
-def check_userdata_complete(instanceId):
-    pass
+def waiter_userdata_complete(instanceId):
+    input()
+
+def waiter_create_images(imageId):
+    ec2_client = boto3.client('ec2', region_name=AWS_REGION_NAME)
+    time.sleep(5)
+    image = ec2_client.describe_images(ImageIds=[imageId])
+    while image['Images'][0]['State']=='pending':
+        time.sleep(5)
+        image = ec2_client.describe_images(ImageIds=[imageId])
+    if image['Images'][0]['State'] != 'available':
+        print("[ERROR] Image building failed")
+        exit()
 
 
 # Create Latest Red Hat OS When AMI ID is None
 def create_ami(architecture):
     ec2_client = boto3.client('ec2', region_name=AWS_REGION_NAME)
+    ec2_resource = boto3.resource('ec2', region_name=AWS_REGION_NAME)
     if architecture == "ARM":
+        print("Create ARM REDHAT OS...")
         resp = ec2_client.describe_images(
             Filters=[
                 {
@@ -93,24 +103,32 @@ def create_ami(architecture):
         images = sorted(resp['Images'], key=lambda image: image['CreationDate'])[-1]
         ARM_REDHAT = images['ImageId']
 
-        instance = ec2_client.create_instances(
+        userdata = USERDATA["NEW"]
+
+        instance = ec2_resource.create_instances(
             ImageId=ARM_REDHAT,
-            InstanceType='t2.micro',
+            InstanceType='t4g.micro',
             MinCount=1,
             MaxCount=1,
+            KeyName="jaeil-seoul",
+            UserData=userdata,
             # KeyName='jaeil-spotlake'
         )
-        check_userdata_complete(instance[0].id)
-        resp = instance.create_image(
+        waiter_userdata_complete(instance[0].id)
+        print("Create Image...")
+        resp = ec2_client.create_image(
             Name='Jupyter_ARM',
             Description='ARM Image to Run Jupyter Container(OptiNotebook)',
-            NoReboot=False
+            NoReboot=False,
+            InstanceId=instance[0].id
         )
+        waiter_create_images(resp['ImageId'])
         ec2_client.terminate_instances(InstanceIds=[instance[0].id])
 
-        return resp.image_id
+        return resp['ImageId']
 
     if architecture == "x86_64":
+        print("Create x86_64 REDHAT OS...")
         resp = ec2_client.describe_images(
             Filters=[
                 {
@@ -126,46 +144,55 @@ def create_ami(architecture):
         images = sorted(resp['Images'], key=lambda image: image['CreationDate'])[-1]
         INTEL_REDHAT = images['ImageId']
 
-        instance = ec2_client.create_instances(
+        userdata = USERDATA["NEW"]
+
+        instance = ec2_resource.create_instances(
             ImageId=INTEL_REDHAT,
             InstanceType='t2.micro',
             MinCount=1,
             MaxCount=1,
+            KeyName="jaeil-seoul",
+            UserData=userdata,
             # KeyName='jaeil-spotlake'
         )
-        check_userdata_complete(instance[0].id)
-        resp = instance.create_image(
+        waiter_userdata_complete(instance[0].id)
+        print("Create Image...")
+        resp = ec2_client.create_image(
             Name='Jupyter_x86_64',
             Description='ARM Image to Run Jupyter Container(OptiNotebook)',
-            NoReboot=False
+            NoReboot=False,
+            InstanceId=instance[0].id
         )
+        waiter_create_images(resp['ImageId'])
         ec2_client.terminate_instances(InstanceIds=[instance[0].id])
 
-        return resp.image_id
+        return resp['ImageId']
 
 
 # Load AMI ID at the System Manager Parameter Store
 def load_ami():
+    global AMI_ARM
+    global AMI_INTEL
     ssm_client = boto3.client('ssm', region_name=AWS_REGION_NAME)
     try:
-        AMI_ARM = ssm_client.get_parameter(Name="AMI_ARM", WithDecryption=True)['Parameter']['Value']
+        AMI_ARM = ssm_client.get_parameter(Name="AMI_ARM", WithDecryption=False)['Parameter']['Value']
     except:
         AMI_ARM = create_ami("ARM")
     try:
-        AMI_INTEL = ssm_client.get_parameter(Name="AMI_INTEL", WithDecryption=True)['Parameter']['Value']
+        AMI_INTEL = ssm_client.get_parameter(Name="AMI_INTEL", WithDecryption=False)['Parameter']['Value']
     except:
-        AMI_INTEL = create_ami("INTEL")
+        AMI_INTEL = create_ami("x86_64")
     ssm_client.put_parameter(
         Name="AMI_ARM",
         Value=AMI_ARM,
-        Type='SecureString',
+        Type='String',
         Description="AMI ID for ARM Architecture",
         Overwrite=True
     )
     ssm_client.put_parameter(
         Name="AMI_INTEL",
         Value=AMI_INTEL,
-        Type='SecureString',
+        Type='String',
         Description="AMI ID for INTEL/AMD Architecture",
         Overwrite=True
     )
@@ -173,15 +200,19 @@ def load_ami():
 
 def load_variable():
     load_ami()
+    global IAM_ROLE_ARN
+    global EFS_ID
+    global SUBNET_ID
+    global SECURITYGROUP_ID
+    global LOAD_BALANCER_NAME
+    global TARGET_GROUP_ARN
     ssm_client = boto3.client('ssm', region_name=AWS_REGION_NAME)
-    IAM_ROLE_ARN = ssm_client.get_parameter(Name="IAM_ROLE_ARN", WithDecryption=True)['Parameter']['Value']
-    AMI_ARM = ssm_client.get_parameter(Name="AMI_ARM", WithDecryption=True)['Parameter']['Value']
-    AMI_INTEL = ssm_client.get_parameter(Name="AMI_INTEL", WithDecryption=True)['Parameter']['Value']
-    EFS_ID = ssm_client.get_parameter(Name="EFS_ID", WithDecryption=True)['Parameter']['Value']
-    SUBNET_ID = ssm_client.get_parameter(Name="SUBNET_ID", WithDecryption=True)['Parameter']['Value']
-    SECURITYGROUP_ID = ssm_client.get_parameter(Name="SECURITYGROUP_ID", WithDecryption=True)['Parameter']['Value']
-    LOAD_BALANCER_NAME = ssm_client.get_parameter(Name="LOAD_BALANCER_NAME", WithDecryption=True)['Parameter']['Value']
-    TARGET_GROUP_ARN = ssm_client.get_parameter(Name="TARGET_GROUP_ARN", WithDecryption=True)['Parameter']['Value']
+    IAM_ROLE_ARN = ssm_client.get_parameter(Name="IAM_ROLE_ARN", WithDecryption=False)['Parameter']['Value']
+    EFS_ID = ssm_client.get_parameter(Name="EFS_ID", WithDecryption=False)['Parameter']['Value']
+    SUBNET_ID = ssm_client.get_parameter(Name="SUBNET_ID", WithDecryption=False)['Parameter']['Value']
+    SECURITYGROUP_ID = ssm_client.get_parameter(Name="SECURITYGROUP_ID", WithDecryption=False)['Parameter']['Value']
+    LOAD_BALANCER_NAME = ssm_client.get_parameter(Name="LOAD_BALANCER_NAME", WithDecryption=False)['Parameter']['Value']
+    TARGET_GROUP_ARN = ssm_client.get_parameter(Name="TARGET_GROUP_ARN", WithDecryption=False)['Parameter']['Value']
 
 
 # Select AMI Worked on Instance's Architecture
@@ -195,7 +226,7 @@ def arch_to_ami(instanceType, ec2_client):
 
 
 # Make New Instance to Migrate
-def create_instance(instanceInfo, state):
+def create_instance(instanceInfo):
     vendor = instanceInfo['Vendor']
 
     requestResponse = {}
@@ -209,7 +240,7 @@ def create_instance(instanceInfo, state):
             ec2_client = boto3.client('ec2', region_name=AWS_REGION_NAME)
             waiter = ec2_client.get_waiter('spot_instance_request_fulfilled')
             imageId = arch_to_ami(instanceType, ec2_client)
-            userdata = USERDATA[state]
+            userdata = USERDATA["MIGRATE"]
 
             requestResponse = ec2_client.request_spot_instances(
                 InstanceCount=1,
@@ -217,7 +248,7 @@ def create_instance(instanceInfo, state):
                     'ImageId': imageId,
                     'InstanceType':instanceType,
                     'Placement': {'AvailabilityZone':az},
-                    'KeyName': 'jaeil-spotlake',
+                    'KeyName': 'jaeil-seoul',
                     'SubnetId': SUBNET_ID,
                     'SecurityGroupIds': [SECURITYGROUP_ID],
                     'IamInstanceProfile': {
@@ -227,7 +258,14 @@ def create_instance(instanceInfo, state):
                 },
             )
             spot_instance_request_id = requestResponse['SpotInstanceRequests'][0]['SpotInstanceRequestId']
-            waiter.wait(SpotInstanceRequestIds=[spot_instance_request_id])
+            try:
+                waiter.wait(SpotInstanceRequestIds=[spot_instance_request_id])
+            except:
+                status = ec2_client.describe_spot_instance_requests(SpotInstanceRequestIds=[spot_instance_request_id])
+                print(status)
+                exit()
+
+            print(spot_instance_request_id)
 
             describeResponse = ec2_client.describe_instances(
                 Filters=[
@@ -237,6 +275,8 @@ def create_instance(instanceInfo, state):
                     }
                 ]
             )
+
+            print(describeResponse)
 
             requestResponse['InstanceId'] = describeResponse['Reservations'][0]['Instances'][0]['InstanceId']
 
@@ -250,18 +290,21 @@ def create_instance(instanceInfo, state):
                     },
                 ]
             )
+            print(response)
+
+            ssm_client = boto3.client('ssm', region_name=AWS_REGION_NAME)
             
             ssm_client.put_parameter(
                 Name="NOW_VENDOR",
                 Value=vendor,
-                Type='SecureString',
+                Type='String',
                 Description="Cloud Vendor Working on Now",
                 Overwrite=True
             )
             ssm_client.put_parameter(
                 Name="NOW_INSTANCE_ID",
                 Value=requestResponse['InstanceId'],
-                Type='SecureString',
+                Type='String',
                 Description="Cloud Vendor Working on Now",
                 Overwrite=True
             )
@@ -275,7 +318,7 @@ def create_instance(instanceInfo, state):
         else:
             print("[ERROR]Info is Incorrect")
     except Exception as e:
-        print("[ERROR]"+e)
+        print("[ERROR]", e)
     
     return requestResponse
 
@@ -312,15 +355,17 @@ def migration(newInstanceInfo, sourceInstanceInfo):
         else:
             print("[ERROR]Info is Incorrect")
     except Exception as e:
-        print("[ERROR]"+e)
+        print("[ERROR]",e)
 
     # Request New Spot Instance
-    response = create_instance(newInstanceInfo, "MIGRATE")
+    response = create_instance(newInstanceInfo)
 
     return response
 
 def init(newInstanceInfo):
-    response = create_instance(newInstanceInfo, "NEW")
+    print("Initialize...")
+    load_variable()
+    response = create_instance(newInstanceInfo)
 
     return response
 
@@ -346,9 +391,9 @@ def lambda_handler(event, context):
         "statusCode": 200
     } 
 
-if __name__ == __main__:
-    init()
-    client = boto3.client('elbv2')
+if __name__ == '__main__':
+    init({"Vendor":"AWS", "InstanceType":"t3.medium", "Region":"ap-noertheast-2", "AZ":"ap-northeast-2a"})
+    client = boto3.client('elbv2', region_name=AWS_REGION_NAME)
     response = client.describe_load_balancers(
         Names=['my-load-balancer']
     )
