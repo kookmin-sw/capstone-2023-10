@@ -26,7 +26,7 @@ resource "aws_security_group" "spot-sg" {
 }
 
 resource "aws_iam_role" "spot-instance-role" {
-  name = "spot-instance-role"
+  name = "${var.prefix}-spot-instance-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -56,4 +56,9 @@ resource "aws_iam_role_policy_attachment" "spot-attach-ssm-full-access" {
 resource "aws_iam_role_policy_attachment" "spot-attach-EFS-client-full-access-policy" {
   role = aws_iam_role.spot-instance-role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonElasticFileSystemClientFullAccess"
+}
+
+resource "aws_iam_instance_profile" "spot-instance-role-profile" {
+  role = aws_iam_role.spot-instance-role.name
+  name = "${var.prefix}-spot-instance-role-profile"
 }
