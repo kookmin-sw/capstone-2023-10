@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cred=$(cat ~/.aws/credentials | grep defualt)
+cred=$(cat ~/.aws/credentials | grep default)
 
 if [ -z $cred ]; then
   echo "Configure Your AWS Account"
