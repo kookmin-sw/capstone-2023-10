@@ -14,9 +14,9 @@ resource "aws_security_group" "spot-sg" {
   } ]
   ingress = [ {
     cidr_blocks = [ "0.0.0.0/0" ]
-    from_port = 0
+    from_port = 1
     protocol = "tcp"
-    to_port = 0
+    to_port = 65535
     description      = "sg"
     ipv6_cidr_blocks = []
     prefix_list_ids  = []

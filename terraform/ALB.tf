@@ -34,8 +34,8 @@ resource "aws_lb" "alb" {
   load_balancer_type = "application"
 }
 
-resource "aws_lb_target_group" "main-worker-tg" {
-  name     = "main-worker-tg"
+resource "aws_lb_target_group" "lb-tg" {
+  name     = "${var.prefix}-tg"
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.vpc.id
@@ -47,35 +47,35 @@ resource "aws_lb_target_group" "main-worker-tg" {
 #   port = 80
 # }
 
-resource "aws_lb_target_group" "jupyter-tg" {
-  name     = "jupyter-tg"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = aws_vpc.vpc.id
-}
+# resource "aws_lb_target_group" "jupyter-tg" {
+#   name     = "jupyter-tg"
+#   port     = 80
+#   protocol = "HTTP"
+#   vpc_id   = aws_vpc.vpc.id
+# }
 
-resource "aws_lb_listener" "main-worker-listener" {
+resource "aws_lb_listener" "lb-listener" {
   load_balancer_arn = aws_lb.alb.arn
   port = "80"
   protocol = "HTTP"
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.main-worker-tg.arn
+    target_group_arn = aws_lb_target_group.lb-tg.arn
   }
 }
 
-resource "aws_lb_listener_rule" "jupyter-listener-rule" {
-  listener_arn = aws_lb_listener.main-worker-listener.arn
-  priority     = 100
+# resource "aws_lb_listener_rule" "jupyter-listener-rule" {
+#   listener_arn = aws_lb_listener.main-worker-listener.arn
+#   priority     = 100
 
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.jupyter-tg.arn
-  }
+#   action {
+#     type             = "forward"
+#     target_group_arn = aws_lb_target_group.jupyter-tg.arn
+#   }
 
-  condition {
-    path_pattern {
-      values = ["/jupyter"]
-    }
-  }
-}
+#   condition {
+#     path_pattern {
+#       values = ["/jupyter"]
+#     }
+#   }
+# }

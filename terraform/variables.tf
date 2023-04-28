@@ -1,9 +1,9 @@
 variable "region" {
   type = string
-  default = "ap-northeast-2"
+  description = "Input Your AWS Region"
 }
 
 variable "prefix" {
   type = string
-  default = "sh-capstone"
+  description = "Input Your System Name"
 }
