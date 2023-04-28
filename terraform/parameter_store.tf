@@ -29,7 +29,7 @@ resource "aws_ssm_parameter" "lb_parameter" {
 }
 
 resource "aws_ssm_parameter" "lb_tg_parameter" {
-  name  = "TARGET_GROUP_ARN"
-  type  = "String"
-  value = aws_lb_target_group.jupyter-tg.arn
+    name = "TARGET_GROUP_ARN"
+    type = "String"
+    value = aws_lb_target_group.lb-tg.arn
 }
