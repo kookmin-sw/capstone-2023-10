@@ -22,17 +22,6 @@ resource "aws_security_group" "alb-sg" {
     prefix_list_ids  = []
     security_groups  = []
     self             = false
-    },
-    {
-      cidr_blocks      = ["0.0.0.0/0"]
-      from_port        = 8800
-      protocol         = "tcp"
-      to_port          = 8800
-      description      = "sg"
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      security_groups  = []
-      self             = false
   }]
 }
 
@@ -50,6 +39,7 @@ resource "aws_lb_target_group" "lb-tg" {
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.vpc.id
+  deregistration_delay = 0
 }
 
 resource "aws_lb_listener" "lb-listener" {
