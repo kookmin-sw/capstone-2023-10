@@ -513,6 +513,10 @@ def init(newInstanceInfo):
 
 def lambda_handler(event, context):
     load_variable()
+    if event['detail']['instance-id'] != NOW_INSTANCE_ID:
+        return {
+            "statusCode": 501, "Message": "Not Jupyter Spot Instance"
+        }
     global MIGRATION_START_TIME
     MIGRATION_START_TIME = time.time()
 
@@ -526,7 +530,7 @@ def lambda_handler(event, context):
         init(newInstanceInfo)
     
     return {
-        "statusCode": 200, "MIGRATION_TIME":MIGRATION_TEST_END - MIGRATION_TEST_START
+        "statusCode": 200, "MIGRATION_TIME": MIGRATION_TEST_END - MIGRATION_TEST_START
     } 
 
 if __name__ == '__main__':
