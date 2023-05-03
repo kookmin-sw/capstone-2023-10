@@ -75,7 +75,7 @@ fi
 
 
 
-zip ./terraform/lambda_function.zip ./lambda/lambda_function.py 
+zip -j ./terraform/lambda_function.zip ./lambda/lambda_function.py 
 
 terraform -chdir=./terraform/ init
 terraform -chdir=./terraform/ apply
