@@ -36,6 +36,10 @@ TARGET_GROUP_ARN = None
 ### ...
 ## << COMMON >>
 USERDATA = {}
+MIGRATION_START_TIME = None
+## << TEMPORALY >>
+MIGRATION_TEST_START = None
+MIGRATION_TEST_END = None
 # ==================================================================================
 
 
@@ -43,38 +47,30 @@ def select_instance(instanceInfo={"Vendor":"Empty"}):
     if instanceInfo['Vendor'] == "Empty":
         pass
     elif instanceInfo['Vendor'] == 'AWS':
-        return {"Vendor":"AWS", "InstanceType":"t2.medium", "Region":"ap-noertheast-2", "AZ":"ap-northeast-2a"}
+        ec2_client = boto3.client("ec2", region_name=AWS_REGION_NAME)
+        resp = ec2_client.describe_instances(InstanceIds=[instanceInfo['InstanceId']])
+        if resp['Reservations'][0]['Instances'][0]['InstanceType'] == 'c5.large':
+            return {"Vendor":"AWS", "InstanceType":"t3.medium", "Region":"ap-noertheast-2", "AZ":"ap-northeast-2a"}
+        elif resp['Reservations'][0]['Instances'][0]['InstanceType'] == 't3.medium':
+            return {"Vendor":"AWS", "InstanceType":"c5.large", "Region":"ap-noertheast-2", "AZ":"ap-northeast-2a"}
+        elif resp['Reservations'][0]['Instances'][0]['InstanceType'] == 'r5a.medium':
+            return {"Vendor":"AWS", "InstanceType":"m5a.medium", "Region":"ap-noertheast-2", "AZ":"ap-northeast-2a"}
+        elif resp['Reservations'][0]['Instances'][0]['InstanceType'] == 'm5a.medium':
+            return {"Vendor":"AWS", "InstanceType":"r5a.medium", "Region":"ap-noertheast-2", "AZ":"ap-northeast-2a"}
+        elif resp['Reservations'][0]['Instances'][0]['InstanceType'] == 'm6g.large':
+            return {"Vendor":"AWS", "InstanceType":"c6g.large", "Region":"ap-noertheast-2", "AZ":"ap-northeast-2a"}
+        elif resp['Reservations'][0]['Instances'][0]['InstanceType'] == 'c6g.large':
+            return {"Vendor":"AWS", "InstanceType":"m6g.large", "Region":"ap-noertheast-2", "AZ":"ap-northeast-2a"}
+        else:
+            return {"Vendor":"AWS", "InstanceType":"t2.micro", "Region":"ap-noertheast-2", "AZ":"ap-northeast-2a"}
     else:
         pass
 
 
-def waiter_userdata_complete(instanceId):
+def waiter_userdata_complete(instanceId, state):
     ssm_client = boto3.client('ssm', region_name=AWS_REGION_NAME)
     command = 'sudo tail -n 1 /var/log/cloud-init-output.log | grep finished | wc -l'
-    while True:
-        try:
-            response = ssm_client.send_command(
-                InstanceIds=[instanceId],
-                DocumentName='AWS-RunShellScript',
-                Parameters={'commands': [command]}
-            )
-            commandId = response['Command']['CommandId']
-
-            time.sleep(10)
-
-            output_response = ssm_client.get_command_invocation(
-                CommandId=commandId,
-                InstanceId=instanceId,
-            )
-            if output_response['StandardOutputContent'].strip() == '1':
-                break
-        except Exception as e:
-            time.sleep(10)
-
-def waiter_checkpointing(instanceId):
-    ssm_client = boto3.client('ssm', region_name=AWS_REGION_NAME)
-    command = 'sudo ls /checkpoint | grep jupyCheckpoint.tar.gz | wc -l'
-    while True:
+    while state == "INIT" or (state=="MIGRATE" and time.time() - MIGRATION_START_TIME < 90):
         try:
             response = ssm_client.send_command(
                 InstanceIds=[instanceId],
@@ -90,9 +86,70 @@ def waiter_checkpointing(instanceId):
                 InstanceId=instanceId,
             )
             if output_response['StandardOutputContent'].strip() == '1':
-                break
+                return True
         except Exception as e:
-            time.sleep(5)
+            time.sleep(3)
+    return False
+
+def waiter_send_message(instanceId, command):
+    ssm_client = boto3.client('ssm', region_name=AWS_REGION_NAME)
+    response = ssm_client.send_command(
+        InstanceIds=[instanceId,],
+        DocumentName="AWS-RunShellScript",
+        Parameters={'commands':[command]}
+    )
+    commandId = response['Command']['CommandId']
+    while True:
+        try:
+            command_invocation = ssm_client.get_command_invocation(
+                CommandId=commandId,
+                InstanceId=instanceId,
+            )
+            status = command_invocation['Status']
+            if status == 'Success':
+                break
+            elif status == 'Failed':
+                print("[ERROR] Run Command Failed")
+                system_off()
+                exit()
+        except Exception as e:
+            time.sleep(3)
+
+
+def checkpointing(instanceId):
+    # Checkpointing from Source Instance
+    # Send Checkpointing Execution Line to Source Instance
+    ssm_client = boto3.client('ssm', region_name=AWS_REGION_NAME)
+    print("Checkpointing...")
+    sourceVendor = NOW_VENDOR
+    try:
+        if sourceVendor == 'AWS':
+            command = f'sudo podman container checkpoint jupyternb --file-locks --tcp-established --keep --print-stats -e {EFS_PATH}/jupyCheckpoint.tar.gz'
+            waiter_send_message(instanceId, command)
+            elbv2_client = boto3.client('elbv2', region_name=AWS_REGION_NAME)
+            response = elbv2_client.deregister_targets(
+                TargetGroupArn=TARGET_GROUP_ARN,
+                Targets=[
+                    {
+                        'Id': instanceId,
+                        'Port': 80,
+                    },
+                ]
+            )
+            ec2_client = boto3.client('ec2', region_name=AWS_REGION_NAME)
+            try:
+                ec2_client.terminate_instances(InstanceIds=[instanceId])
+            except:
+                print("[LOG] Already Terminated")
+        elif sourceVendor == 'AZURE':
+            pass
+        elif sourceVendor == 'GCP':
+            pass
+        else:
+            print("[ERROR] Info is Incorrect(in checkpointing)")
+    except Exception as e:
+        print("[ERROR]",e)
+
 
 def waiter_create_images(imageId):
     ec2_client = boto3.client('ec2', region_name=AWS_REGION_NAME)
@@ -140,7 +197,7 @@ def create_ami(architecture):
                 'Arn': IAM_ROLE_ARN
             },
         )
-        waiter_userdata_complete(instance[0].id)
+        waiter_userdata_complete(instance[0].id, "NEW")
         print("Create Image...")
         resp = ec2_client.create_image(
             Name='Jupyter_ARM',
@@ -183,7 +240,7 @@ def create_ami(architecture):
                 'Arn': IAM_ROLE_ARN
             },
         )
-        waiter_userdata_complete(instance[0].id)
+        waiter_userdata_complete(instance[0].id, "NEW")
         print("Create Image...")
         resp = ec2_client.create_image(
             Name='Jupyter_x86_64',
@@ -234,6 +291,8 @@ def load_variable():
     global LOAD_BALANCER_NAME
     global TARGET_GROUP_ARN
     global USERDATA
+    global NOW_VENDOR
+    global NOW_INSTANCE_ID
     ssm_client = boto3.client('ssm', region_name=AWS_REGION_NAME)
     IAM_ROLE_ARN = ssm_client.get_parameter(Name="IAM_ROLE_ARN", WithDecryption=False)['Parameter']['Value']
     EFS_ID = ssm_client.get_parameter(Name="EFS_ID", WithDecryption=False)['Parameter']['Value']
@@ -241,6 +300,11 @@ def load_variable():
     SECURITYGROUP_ID = ssm_client.get_parameter(Name="SECURITYGROUP_ID", WithDecryption=False)['Parameter']['Value']
     LOAD_BALANCER_NAME = ssm_client.get_parameter(Name="LOAD_BALANCER_NAME", WithDecryption=False)['Parameter']['Value']
     TARGET_GROUP_ARN = ssm_client.get_parameter(Name="TARGET_GROUP_ARN", WithDecryption=False)['Parameter']['Value']
+    try:
+        NOW_VENDOR = ssm_client.get_parameter(Name="NOW_VENDOR", WithDecryption=True)['Parameter']['Value']
+        NOW_INSTANCE_ID = ssm_client.get_parameter(Name="NOW_INSTANCE_ID", WithDecryption=True)['Parameter']['Value']
+    except:
+        print("[LOG] NOW_VENDOR, NOW_INSTANCE_ID is not needed in INIT")
     USERDATA = {
         "AMI_ARM" : f"""#!/bin/bash
 sudo yum update -y
@@ -275,14 +339,12 @@ sudo systemctl enable amazon-ssm-agent
 sudo systemctl start amazon-ssm-agent
 sudo mkdir {EFS_PATH}
 sudo mount -t efs -o tls {EFS_ID}:/ {EFS_PATH}
-sudo podman run --name jupyternb -e GRANT_SUDO=yes --user root -p 80:8888 -d jupyter/base-notebook start-notebook.sh --NotebookApp.password='' --NotebookApp.token=''""",
+sudo podman run --name jupyternb -e GRANT_SUDO=yes --user root -p 80:8888 -d jupyter/base-notebook start-notebook.sh --NotebookApp.password='' --NotebookApp.token='' --NotebookNotary.db_file=':memory:'""",
         "MIGRATE" : f"""#!/bin/bash
 sudo systemctl enable amazon-ssm-agent
 sudo systemctl start amazon-ssm-agent
 sudo mkdir {EFS_PATH}
-sudo mount -t efs -o tls {EFS_ID}:/ {EFS_PATH}
-sudo podman container restore --file-locks --tcp-established --keep --print-stats --import {EFS_PATH}/jupyCheckpoint.tar.gz
-sudo podman start jupyternb"""
+sudo mount -t efs -o tls {EFS_ID}:/ {EFS_PATH}"""
     }
     load_ami()
 
@@ -297,6 +359,30 @@ def arch_to_ami(instanceType, ec2_client):
         return AMI_INTEL
 
 
+def system_off():
+    load_variable()
+    elbv2_client = boto3.client('elbv2', region_name=AWS_REGION_NAME)
+    ec2_client = boto3.client('ec2', region_name=AWS_REGION_NAME)
+    ssm_client = boto3.client('ssm', region_name=AWS_REGION_NAME)
+    response = elbv2_client.describe_target_health(
+        TargetGroupArn=TARGET_GROUP_ARN
+    )
+    instanceId = response['TargetHealthDescriptions'][0]['Target']['Id']
+    elbv2_client = boto3.client('elbv2', region_name=AWS_REGION_NAME)
+    response = elbv2_client.deregister_targets(
+        TargetGroupArn=TARGET_GROUP_ARN,
+        Targets=[
+            {
+                'Id': instanceId,
+                'Port': 80,
+            },
+        ]
+    )
+    ec2_client.terminate_instances(InstanceIds=[instanceId])
+    ssm_client.delete_parameter(Name='NOW_INSTANCE_ID')
+    ssm_client.delete_parameter(Name='NOW_VENDOR')
+
+
 # Make New Instance to Migrate
 def create_instance(instanceInfo, state):
     vendor = instanceInfo['Vendor']
@@ -305,8 +391,6 @@ def create_instance(instanceInfo, state):
     try:
         if vendor == 'AWS':
             # Request AWS Spot Instance in AWS Subnet
-            print("Create Instance...")
-            start = time.time()
             instanceType = instanceInfo['InstanceType']
             az = instanceInfo['AZ']
             region = instanceInfo['Region']
@@ -332,17 +416,13 @@ def create_instance(instanceInfo, state):
                 },
             )
             spot_instance_request_id = requestResponse['SpotInstanceRequests'][0]['SpotInstanceRequestId']
-            usir = time.time()
-            print("Until Spot Instance Ruqest:",usir - start)
-            print("Wait until fulfilled...")
             waiter.wait(
                 SpotInstanceRequestIds=[spot_instance_request_id],
                 WaiterConfig={
-                    'Delay': 3,
+                    'Delay': 1,
+                    'MaxAttempts': 120
                 }
             )
-            usif = time.time()
-            print("Until Spot Instance Fulfilled:", usif - usir)
 
             describeResponse = ec2_client.describe_instances(
                 Filters=[
@@ -355,24 +435,31 @@ def create_instance(instanceInfo, state):
 
             requestResponse['InstanceId'] = describeResponse['Reservations'][0]['Instances'][0]['InstanceId']
 
-            print("Wait Until Userdata Complete...")
+            instanceId = requestResponse['InstanceId']
             
-            waiter_userdata_complete(requestResponse['InstanceId'])
-
-            uuc = time.time()
-
-            print("Until Userdata Completed:", uuc - usif)
+            result = waiter_userdata_complete(instanceId, state)
 
             elbv2 = boto3.client('elbv2', region_name=AWS_REGION_NAME)
             response = elbv2.register_targets(
                 TargetGroupArn=TARGET_GROUP_ARN,
                 Targets=[
                     {
-                        'Id': requestResponse['InstanceId'],
+                        'Id': instanceId,
                         'Port': 80,
                     },
                 ]
             )
+            
+            if state == "MIGRATE":
+                global MIGRATION_TEST_START
+                MIGRATION_TEST_START = time.time()
+                checkpointing(NOW_INSTANCE_ID)
+                if result == False:
+                    result = waiter_userdata_complete(instanceId, "INIT")
+                waiter_send_message(instanceId, f"sudo podman container restore --file-locks --tcp-established --keep --print-stats --import {EFS_PATH}/jupyCheckpoint.tar.gz")
+                global MIGRATION_TEST_END
+                MIGRATION_TEST_END = time.time()
+                print(MIGRATION_TEST_END - MIGRATION_TEST_START)
 
             ssm_client = boto3.client('ssm', region_name=AWS_REGION_NAME)
             
@@ -385,13 +472,11 @@ def create_instance(instanceInfo, state):
             )
             ssm_client.put_parameter(
                 Name="NOW_INSTANCE_ID",
-                Value=requestResponse['InstanceId'],
+                Value=instanceId,
                 Type='String',
                 Description="Cloud Vendor Working on Now",
                 Overwrite=True
             )
-
-            print("Total:", time.time() - start)
 
         elif vendor == 'AZURE':
             # Request AZURE Spot VM in AZURE Subnet
@@ -400,7 +485,7 @@ def create_instance(instanceInfo, state):
             # Request GCP Spot VM in GCP Subnet
             pass
         else:
-            print("[ERROR]Info is Incorrect")
+            print("[ERROR] Info is Incorrect(in create_instance)")
     except Exception as e:
         print("[ERROR]", e)
     
@@ -409,47 +494,9 @@ def create_instance(instanceInfo, state):
 
 # Migrate to New Instance from Source Instance
 def migration(newInstanceInfo, sourceInstanceInfo):
-    # Checkpointing from Source Instance
-    # Send Checkpointing Execution Line to Source Instance
-    print("Checkpointing...")
-    sourceVendor = sourceInstanceInfo['Vendor']
-    try:
-        if sourceVendor == 'AWS':
-            ssm_client = boto3.client('ssm', region_name=AWS_REGION_NAME)
-            instanceId = sourceInstanceInfo['InstanceId']
-            response = ssm_client.send_command(
-                InstanceIds=[instanceId,],
-                DocumentName="AWS-RunShellScript",
-                Parameters={'commands':[f'sudo podman container checkpoint jupyternb --file-locks --tcp-established --keep --print-stats -e {EFS_PATH}/jupyCheckpoint.tar.gz']}
-            )
-            waiter_checkpointing(instanceId)
-            elbv2_client = boto3.client('elbv2', region_name=AWS_REGION_NAME)
-            response = elbv2_client.deregister_targets(
-                TargetGroupArn=TARGET_GROUP_ARN,
-                Targets=[
-                    {
-                        'Id': instanceId,
-                        'Port': 80,
-                    },
-                ]
-            )
-            pass
-        elif sourceVendor == 'AZURE':
-            pass
-        elif sourceVendor == 'GCP':
-            pass
-        else:
-            print("[ERROR]Info is Incorrect")
-    except Exception as e:
-        print("[ERROR]",e)
-
     print("Request New Spot Instance...")
-
     # Request New Spot Instance
     response = create_instance(newInstanceInfo, "MIGRATE")
-
-    ec2_client = boto3.client('ec2', region_name=AWS_REGION_NAME)
-    ec2_client.terminate_instances(InstanceIds=[sourceInstanceInfo['InstanceId']])
 
     print("Complete!")
     print("Refresh your Jupyter page")
@@ -466,15 +513,11 @@ def init(newInstanceInfo):
 
 def lambda_handler(event, context):
     load_variable()
+    global MIGRATION_START_TIME
+    MIGRATION_START_TIME = time.time()
 
     try:
         ssm_client = boto3.client('ssm', region_name=AWS_REGION_NAME)
-        elbv2_client = boto3.client('elbv2', region_name=AWS_REGION_NAME)
-        response = elbv2_client.describe_target_health(
-            TargetGroupArn=TARGET_GROUP_ARN
-        )
-        NOW_VENDOR = ssm_client.get_parameter(Name="NOW_VENDOR", WithDecryption=True)['Parameter']['Value']
-        NOW_INSTANCE_ID = ssm_client.get_parameter(Name="NOW_INSTANCE_ID", WithDecryption=True)['Parameter']['Value']
         sourceInstanceInfo = {'Vendor': NOW_VENDOR, 'InstanceId': NOW_INSTANCE_ID}
         newInstanceInfo = select_instance(sourceInstanceInfo)
         migration(newInstanceInfo, sourceInstanceInfo)
@@ -483,11 +526,11 @@ def lambda_handler(event, context):
         init(newInstanceInfo)
     
     return {
-        "statusCode": 200
+        "statusCode": 200, "MIGRATION_TIME":MIGRATION_TEST_END - MIGRATION_TEST_START
     } 
 
 if __name__ == '__main__':
-    init({"Vendor":"AWS", "InstanceType":"t2.medium", "Region":"ap-noertheast-2", "AZ":"ap-northeast-2a"})
+    init({"Vendor":"AWS", "InstanceType":"m6g.large", "Region":"ap-noertheast-2", "AZ":"ap-northeast-2a"})
     client = boto3.client('elbv2', region_name=AWS_REGION_NAME)
     response = client.describe_load_balancers(
         Names=[LOAD_BALANCER_NAME]
@@ -497,3 +540,4 @@ if __name__ == '__main__':
     print("=================Connect to Jupyter Notebook=================")
     print(dns_name+"/tree")
     print("=============================================================")
+
