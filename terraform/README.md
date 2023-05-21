@@ -16,7 +16,7 @@
   terraform apply
   ```
 
-4. "Enter a value:" 가 뜨면 yes를 입력한다.
+4. "Enter a value:" 가 총 3번 뜨는데 시스템이름, 리전이름, yes를 입력한다.
    
 5. 생성된 클라우드 리소스들을 제거하려면 다음 명령어를 실행한다.
   ```

@@ -33,3 +33,9 @@ resource "aws_ssm_parameter" "lb_tg_parameter" {
     type = "String"
     value = aws_lb_target_group.lb-tg.arn
 }
+
+resource "aws_ssm_parameter" "lmabda_url" {
+    name = "LAMBDA_FUNCTION_URL"
+    type = "String"
+    value = aws_lambda_function_url.main-worker-url.function_url
+}
