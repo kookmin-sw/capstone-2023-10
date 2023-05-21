@@ -7,6 +7,45 @@ if [ -z $cred ]; then
   aws configure
 fi
 
+echo Please enter the Region[AWS] where the system will run: 
+read region_name
+
+echo Please enter the System Name: 
+read system_prefix
+
+echo Please enter the instance type for which you want the system to run
+read instance_type
+
+cat << EOF > ./terraform/variables.tf
+variable "region" {
+  type = string
+  description = "Input Your AWS Region"
+  default = "$region_name"
+}
+
+variable "prefix" {
+  type = string
+  description = "Input Your System Name"
+  default = "$system_prefix"
+}
+
+EOF
+
+cat << EOF > ./lambda/const_config.py
+## << AWS >>
+### Your Account Profile in Your AWS-CLI
+AWS_PROFILE_NAME = "default"
+AWS_REGION_NAME = "$region_name"
+START_INSTANCE_TYPE = "$instance_type"
+## << GCP >>
+### ...
+## << AZURE >>
+### ...
+## << COMMON >>
+SYSTEM_PREFIX = "$system_prefix"
+
+EOF
+
 # Detect the operating system
 OS=$(uname -s)
 
@@ -16,7 +55,7 @@ if [ "$OS" = "Darwin" ]; then
     sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
   sudo brew update
-  sudo brew install python@3.9
+  sudo brew install python@3.10
   sudo pip install -r pip_requirements.txt
   sudo brew install hashicorp/tap/terraform@1.4.5
 
@@ -25,7 +64,7 @@ elif [ "$OS" = "Linux" ]; then
   if [ -f "/etc/lsb-release" ]; then
     # Ubuntu
     sudo apt-get update
-    sudo apt-get install python3.9
+    sudo apt-get install python3.10
     sudo pip install -r pip_requirements.txt
     sudo apt-get install -y wget unzip
     sudo wget https://releases.hashicorp.com/terraform/1.4.5/terraform_1.4.5_linux_amd64.zip
@@ -34,7 +73,7 @@ elif [ "$OS" = "Linux" ]; then
   elif [ -f "/etc/redhat-release" ]; then
     # RedHat
     sudo yum update
-    sudo yum install python39
+    sudo yum install python310
     sudo pip install -r pip_requirements.txt
     sudo yum install -y wget unzip
     sudo wget https://releases.hashicorp.com/terraform/1.4.5/terraform_1.4.5_linux_amd64.zip
@@ -75,12 +114,18 @@ fi
 
 
 
-zip -j ./terraform/lambda_function.zip ./lambda/lambda_function.py 
+zip -j ./terraform/jupyter-main-worker.zip ./lambda/migrations/lambda_function.py ./lambda/const_config.py
+zip -j ./terraform/model-function.zip ./lambda/const_config.py
+cd ./lambda/models/
+zip -r ../../terraform/model-function.zip *
+cd ../../
 
 terraform -chdir=./terraform/ init
-terraform -chdir=./terraform/ apply
+terraform -chdir=./terraform/ apply -auto-approve
 
-rm ./terraform/lambda_function.zip
+rm ./terraform/jupyter-main-worker.zip
+rm ./terraform/model-function.zip
 
-python3 ./lambda/lambda_function.py
+python3 ./lambda/migrations/lambda_function.py
+python3 ./lambda/models/lambda_function.py
 
