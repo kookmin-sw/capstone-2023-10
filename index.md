@@ -1,37 +1,125 @@
-## Welcome to GitHub Pages
+# [10팀] OptiNotebook  
+github : [capstone-2023-10](https://github.com/kookmin-sw/capstone-2023-10) 
 
-You can use the [editor on GitHub](https://github.com/kookmin-sw/cap-template/edit/master/index.md) to maintain and preview the content for your website in Markdown files.
+<br/>
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+> <br/>
+> 
+> # **산학 협력 기업**
+> <img src="https://a0.awsstatic.com/libra-css/images/logos/aws_logo_smile_1200x630.png" width="400" height="200"/>
+> 
+> ## **AWS**
+> **AWS**(Amazon Web Services)는 아마존닷컴의 클라우드 컴퓨팅 사업부이다.
+>
+> 아마존 웹 서비스는 다른 웹 사이트나 클라이언트측 응용 프로그램에 대해 온라인 서비스를 제공하고 있다. 이러한 서비스의 상당수는 최종 사용자에 직접 공개되는 것이 아니고, 다른 개발자가 사용 가능한 기능을 제공하는 플랫폼을 제공하는 PaaS이다.
+>
+> 아마존 웹 서비스의 각종 서비스는 REST 프로토콜 및 SOAP 프로토콜을 통해 접근, 이용 및 관리가 가능하다. 비용은 실제 사용량에 따라 결정되며, 일부 서비스의 경우 미리 고정된 금액을 지불하는 형태도 있다.  
+> <br/>
+>
+> ## _**기업멘토**_
+> ### 김병준 이사님
+> - E-mail : bjsearch@amazon.com  
+> <br/>
 
-### Markdown
+<br/>
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+> <br/>
+> 
+> # **프로젝트 소개**
+> 
+> 스팟 인스턴스는 온디맨드 인스턴스를 위한 컴퓨팅 자원 중 잉여 컴퓨팅 자원을 기존 인스턴스에 비해 저렴한 가격(최대 90% 할인)으로 사용자에게 제공하는 인스턴스입니다. 그러나, 온디멘드 사용자의 증가나 스팟 인스턴스 사용자의 증가로 잉여 컴퓨팅 자원이 부족해지면 사용중임에도 interrupt가 발생해 종료될 수 있습니다. 저희의 프로젝트는 AWS, AZURE의 가격 정책과 제공되는 안전성 지표를 가지고 인공지능 모델을 학습해 최적의 스팟 인스턴스 선택 시스템을 구축하여 사용자에게 안정적인 서비스를 제공하는 것 입니다.
+>
+> **OptiNotebook**은 "최적화된 노트북"을 의미하며, 비용, 안정성, 성능 모두에서 최적의 선택을 제공하고, 선택된 인스턴스가 실행될 때 기존에 사용하던 작업이 있으면 자동으로 마이그레이션을 수행하는 기능을 갖추고 있습니다 스팟인스턴스 사용중에 interrupt가 발생 하더라도 사용자는 잠시 후 새로운 인스턴스가 실행되면 하던 작업을 이어서 할 수 있습니다. 이 프로젝트를 이용하면 최적화된 환경에서 주피터 노트북을 실행할 수 있습니다.  
+> 
+> <br/>
+>
+> ---
+> 
+> ## **구조도**
+>
+> <br/>
+>
+> ![228824540-f6a6011e-88cf-4781-a46b-ba77c3acbd42](https://user-images.githubusercontent.com/54831356/239753958-7b42648d-8aee-49dc-a161-61b0e0361809.png)
+> 
+> ---
+> 
+> <br/>
+> 
+> ### 1. 클라우드 컴퓨팅 서비스란?
+> &nbsp;클라우드 컴퓨팅 서비스는 인터넷을 통해 컴퓨팅 리소스를 제공하는 서비스입니다. 사용자가 컴퓨팅 리소스를 필요한 만큼 동적으로 확장하거나 축소할 수 있어서, 유연성과 확장성이 뛰어나다는 장점이 있습니다. 또한 클라우드 서비스 제공자가 관리하는 인프라를 사용하기 때문에, 사용자는 인프라 관리에 대한 부담을 덜 수 있습니다.  
+> 
+> <br/>
+> 
+> ### 2. 인스턴스란?
+> &nbsp;클라우드 컴퓨팅 환경에서 가상 머신(Virtual Machine)을 의미합니다. 사용자가 원하는 운영체제(OS)를 선택하여 설치하고, 필요한 애플리케이션을 설치하여 사용할 수 있습니다.  
+> 
+> <br/>
+>
+> ### 3. 인스턴스의 종류
+>   1. 온디맨드 인스턴스(On-Demand Instance)  
+>   필요한 만큼 인스턴스를 생성하여 사용하고, 시간 단위로 지불하는 방식입니다. 인스턴스를 사용하지 않을 때는 인스턴스를 중지하거나 삭제하여 비용을 절감할 수 있습니다.
+> 
+>   2. 예약 인스턴스(Reserved Instance)  
+>   미리 예약한 인스턴스를 일정 기간 동안 사용하는 방식입니다. 예약 인스턴스를 미리 구매하면 인스턴스 비용이 저렴해지는 장점이 있습니다.
+> 
+> 3. 스팟 인스턴스(Spot Instance)  
+> 남는 컴퓨팅 자원을 경매 방식으로 제공하는 방식입니다. 일정 가격을 제시하여 인스턴스를 사용할 수 있지만, 다른 사용자가 더 높은 가격을 제시하거나 남는 컴퓨팅 자원이 부족해지면 인스턴스가 중지될 수 있습니다.  
+> <br/>
 
-```markdown
-Syntax highlighted code block
+<br/>
 
-# Header 1
-## Header 2
-### Header 3
+> <br/>
+> 
+> ## **프로젝트 소개 영상**  
+> 
+> <br/>
+>
+> 추후 추가예정
+> 
+> <br/>
+ 
+<br/>
 
-- Bulleted
-- List
+> <br/>
+> 
+> ## **팀 소개**
+> 
+> <br/>
+> 
+> ### 이창우 교수님
+> * role : 지도교수, 멘토
+> * E-mail : leecw05@kookmin.ac.kr
+> 
+> ---
+> 
+> ### 황재일  
+> * Student ID : 20203169  
+> * role : 팀장, 주피터 노트북과 Main Worker 인스턴스 마이그레이션 시스템 구축  
+> * E-mail : jaeil@kookmin.ac.kr  
+> 
+> ---
+> 
+> ### 강석현
+> * Student ID : 20163080
+> * role : Main Worker DNS 서비스 구성
+> * E-mail : kh3654po@gmail.com  
+> 
+> ---
+> 
+> ### 김지수
+> * Student ID : 20191429
+> * role : 스팟 인스턴스 선택 모델 개발
+> * E-mail : wltn2860@kookmin.ac.kr  
+> <br/>
 
-1. Numbered
-2. List
+<br/>
 
-**Bold** and _Italic_ and `Code` text
+> <br/>
+> 
+> ## **사용법**  
+>
+> 1. git clone https://github.com/kookmin-sw/capstone-2023-10.git
+> 2. cd capstone-2023-10
+> 3. bash run.sh
+> <br/>
 
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/kookmin-sw/cap-template/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
