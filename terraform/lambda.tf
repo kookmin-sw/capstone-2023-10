@@ -10,9 +10,9 @@ resource "aws_lambda_function" "main-worker" {
 
 resource "aws_lambda_function" "model-function" {
   function_name = "${var.prefix}-model-function"
-  filename      = "model-function.zip"
-  handler       = "lambda_function.lambda_handler"
-  runtime       = "python3.9"
+  package_type  = "Image"
+  architectures = ["x86_64"]
+  image_uri     = "${var.image_uri}"
   memory_size   = 1 * 1024
   timeout       = 900
   role          = aws_iam_role.lambda-role.arn
@@ -20,6 +20,11 @@ resource "aws_lambda_function" "model-function" {
 
 resource "aws_lambda_function_url" "main-worker-url" {
   function_name = aws_lambda_function.main-worker.function_name
+  authorization_type = "NONE"
+}
+
+resource "aws_lambda_function_url" "model-function-url" {
+  function_name = aws_lambda_function.model-function.function_name
   authorization_type = "NONE"
 }
 
