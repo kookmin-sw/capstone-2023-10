@@ -86,7 +86,8 @@
 <br/>
 
 ## **5. 기타**
-추후 추가 예정
+![팀10-OptiShifters-포스터 (1)](https://github.com/kookmin-sw/capstone-2023-10/assets/105338304/401095cb-c154-4604-a8b2-a15ec708ae4b)
+
 
 
 
