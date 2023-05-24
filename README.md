@@ -42,7 +42,8 @@
 <br/>
 
 ## **2. 소개 영상**
-추후 추가 예정
+[https://youtu.be/S6cBbCjz7q0](https://youtu.be/S6cBbCjz7q0)
+
 
 <br/>
 
