@@ -36,7 +36,7 @@
 <br/>
 
 ## 구조도
-![228824540-f6a6011e-88cf-4781-a46b-ba77c3acbd42](https://user-images.githubusercontent.com/66048830/229359450-81b377bb-cf71-41ef-b7d1-8c678b3713bf.png)
+![228824540-f6a6011e-88cf-4781-a46b-ba77c3acbd42](https://user-images.githubusercontent.com/54831356/239753958-7b42648d-8aee-49dc-a161-61b0e0361809.png)
 
 
 <br/>
@@ -58,18 +58,19 @@
 <br/>
 
 ## 황재일
-- Student ID : 20203169
-- role : 팀장, 주피터 노트북과 Main Worker 인스턴스 마이그레이션 시스템 구축
+- Student ID : ****3169
+- role : 팀장, 주피터 노트북 기능 커스텀, 서버리스 스팟 인스턴스 마이그레이션 시스템 구축
 - E-mail : jaeil@kookmin.ac.kr
 
 
 ## 강석현
-- Student ID : 20163080
-- role : Main Worker DNS 서비스 구성
+- Student ID : ****3080
+- role : 클라우드 환경 구축, DNS 서비스 구성
 - E-mail : kh3654po@gmail.com
 
+
 ## 김지수
-- Student ID : 20191429
+- Student ID : ****1429
 - role : 스팟 인스턴스 안정성 예측 모델 개발
 - E-mail : wltn2860@kookmin.ac.kr
 
@@ -78,7 +79,9 @@
 
 ## **4. 사용법**
 
-추후 추가 예정
+1. git clone https://github.com/kookmin-sw/capstone-2023-10.git
+2. cd capstone-2023-10
+3. bash run.sh
 
 <br/>
 

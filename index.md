@@ -39,7 +39,7 @@ github : [capstone-2023-10](https://github.com/kookmin-sw/capstone-2023-10)
 >
 > <br/>
 >
-> ![228824540-f6a6011e-88cf-4781-a46b-ba77c3acbd42](https://user-images.githubusercontent.com/66048830/229359450-81b377bb-cf71-41ef-b7d1-8c678b3713bf.png)
+> ![228824540-f6a6011e-88cf-4781-a46b-ba77c3acbd42](https://user-images.githubusercontent.com/54831356/239753958-7b42648d-8aee-49dc-a161-61b0e0361809.png)
 > 
 > ---
 > 
@@ -118,6 +118,8 @@ github : [capstone-2023-10](https://github.com/kookmin-sw/capstone-2023-10)
 > 
 > ## **사용법**  
 >
-> 추후 추가 예정  
+> 1. git clone https://github.com/kookmin-sw/capstone-2023-10.git
+> 2. cd capstone-2023-10
+> 3. bash run.sh
 > <br/>
 
