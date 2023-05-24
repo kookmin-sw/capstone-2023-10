@@ -68,9 +68,10 @@
 - role : 클라우드 환경 구축, DNS 서비스 구성
 - E-mail : kh3654po@gmail.com
 
+
 ## 김지수
 - Student ID : ****1429
-- role : 스팟 인스턴스 선택 모델 개발
+- role : 스팟 인스턴스 안정성 예측 모델 개발
 - E-mail : wltn2860@kookmin.ac.kr
 
 
