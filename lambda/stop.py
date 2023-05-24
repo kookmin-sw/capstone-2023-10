@@ -1,5 +1,5 @@
 import boto3
-from datetime import datetime
+from datetime import datetime, timezone
 from const_config import *
 
 if AWS_PROFILE_NAME == "default":
@@ -9,9 +9,11 @@ else:
 ec2_client = session.client('ec2')
 elbv2_client = session.client('elbv2')
 ssm_client = session.client('ssm')
+s3_client = session.client('s3')
 
 NOW_INSTANCE_ID = ssm_client.get_parameter(Name="NOW_INSTANCE_ID", WithDecryption=False)['Parameter']['Value']
 NOW_INSTANCE = ssm_client.get_parameter(Name="NOW_INSTANCE", WithDecryption=False)['Parameter']['Value']
+TARGET_GROUP_ARN = ssm_client.get_parameter(Name="TARGET_GROUP_ARN", WithDecryption=False)['Parameter']['Value']
 
 
 try:
@@ -24,38 +26,38 @@ try:
             },
         ]
     )
-except:
-    pass
+except Exception as e:
+    print(e)
 try:
     ec2_client.terminate_instances(InstanceIds=[NOW_INSTANCE_ID])
     s3_client.put_object(Bucket=SYSTEM_PREFIX+'-system-log', Key=f'InterruptLog/{datetime.strftime(datetime.now(timezone.utc), "%Y-%m-%d_%H:%M:%S")}.log', Body=f'{NOW_INSTANCE} terminated at {datetime.strftime(datetime.now(timezone.utc), "%Y-%m-%d %H:%M:%S")}')
-except:
-    pass
+except Exception as e:
+    print(e)
 try:
     ssm_client.delete_parameter(Name='NOW_INSTANCE_ID')
-except:
-    pass
+except Exception as e:
+    print(e)
 try:
     ssm_client.delete_parameter(Name='NOW_VENDOR')
-except:
-    pass
+except Exception as e:
+    print(e)
 try:
     ssm_client.delete_parameter(Name='NOW_AZ')
-except:
-    pass
+except Exception as e:
+    print(e)
 try:
     ssm_client.delete_parameter(Name='NOW_INSTANCE')
-except:
-    pass
+except Exception as e:
+    print(e)
 try:
     ssm_client.delete_parameter(Name='NEXT_AZ')
-except:
-    pass
+except Exception as e:
+    print(e)
 try:
-    ssm_client.delete_parameter(Name='NEXT_INSTNACE')
-except:
-    pass
+    ssm_client.delete_parameter(Name='NEXT_INSTANCE')
+except Exception as e:
+    print(e)
 try:
     ssm_client.delete_parameter(Name='IS_MIGRATE')
-except:
-    pass
+except Exception as e:
+    print(e)
