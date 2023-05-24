@@ -70,7 +70,7 @@
 
 ## 김지수
 - Student ID : 20191429
-- role : 스팟 인스턴스 선택 모델 개발
+- role : 스팟 인스턴스 안정성 예측 모델 개발
 - E-mail : wltn2860@kookmin.ac.kr
 
 
