@@ -93,22 +93,22 @@ github : [capstone-2023-10](https://github.com/kookmin-sw/capstone-2023-10)
 > ---
 > 
 > ### 황재일  
-> * Student ID : 20203169  
+> * Student ID : ****3169  
 > * role : 팀장, 주피터 노트북과 Main Worker 인스턴스 마이그레이션 시스템 구축  
 > * E-mail : jaeil@kookmin.ac.kr  
 > 
 > ---
 > 
 > ### 강석현
-> * Student ID : 20163080
+> * Student ID : ****3080
 > * role : Main Worker DNS 서비스 구성
 > * E-mail : kh3654po@gmail.com  
 > 
 > ---
 > 
 > ### 김지수
-> * Student ID : 20191429
-> * role : 스팟 인스턴스 선택 모델 개발
+> * Student ID : ****1429
+> * role : 스팟 인스턴스 안정성 예측 모델 개발
 > * E-mail : wltn2860@kookmin.ac.kr  
 > <br/>
 
