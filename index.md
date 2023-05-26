@@ -74,7 +74,7 @@ github : [capstone-2023-10](https://github.com/kookmin-sw/capstone-2023-10)
 > 
 > <br/>
 >
-> 추후 추가예정
+> [![Demo-Youtube](https://img.youtube.com/vi/S6cBbCjz7q0/0.jpg)](https://youtu.be/S6cBbCjz7q0)
 > 
 > <br/>
  
