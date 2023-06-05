@@ -86,7 +86,7 @@ def load_pool(instanceType):
 
 
 def load_data(pools):
-    url = "https://be2laqr4wzyjma675v5mdzuizi0zxmjz.lambda-url.us-west-2.on.aws/?"+("&".join(pools))
+    url = # Lambda Function URL
     spot_data = requests.get(url).json()
     now = datetime.now()
     now = datetime.strptime(datetime.strftime(now, f"%Y-%m-%d %H:{now.minute//10*10}:00"), "%Y-%m-%d %H:%M:%S")
